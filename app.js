@@ -18,6 +18,7 @@ mongoose.connection.once('open', function(err){
     console.log("successfully connected with the database...");
 });
 
+app.use(express.static('public/uploads'));
 require('./routes')(app);
 
 server.listen(port, () => {

@@ -5,7 +5,7 @@ var VideoSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    path: {
+    video: {
         type: String,
         required: true
     },

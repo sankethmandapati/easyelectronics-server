@@ -14,28 +14,52 @@ function generateJwt(userDetails) {
     return obj;
 }
 
-exports.authenticate = (token) => {
+function authenticateJwt(token) {
     return new Promise((resolve, reject) => {
-        if(!token) {
-            return reject("Token not found");
-        }
-        jwt.verify(token, 'e@$yE|ecTr0n!c$', function(err, decoded) {
-            if(err || !decoded) {
-                return reject("Failed to authenticate user");
+        try {
+            if(!token) {
+                throw new Error("Token not found");
             }
-            Users.findById(decoded.userId).select('-password').lean()
-            .then((user) => {
+            jwt.verify(token, 'e@$yE|ecTr0n!c$', async function(err, decoded) {
+                if(err || !decoded) {
+                    throw new Error("Failed to authenticate user");
+                }
+                const user = await Users.findById(decoded.userId).select('-password').lean();
                 if(!user)
-                    return reject("Unable to identify the user");
+                    throw new Error("Unable to authenticate the user");
                 else if(!user.emailVerified)
-                    return reject("Email address not verified");
-                return resolve(user);
-            })
-            .catch((err) => {
-                return reject("Problem in finding the user details");
+                    throw new Error("Email address not verified");
+                resolve(user);
             });
-        });
+        } catch(err) {
+            console.log("err: ", err);
+            throw err;
+        }
     });
+}
+
+exports.authenticate = async (req, res, next) => {
+    try {
+        const token = req.headers.accesstoken;
+        req.user = await authenticateJwt(token);
+        next();
+    } catch(err) {
+        return res.status(403).send(err.message);
+    }
+};
+
+exports.isAdmin = async function(req, res, next) {
+    try {
+        const token = req.headers.accesstoken;
+        const user = await authenticateJwt(token);
+        if(user.role !== 'admin') {
+            return res.status(403).send("You dont have permission to perform this operation");
+        }
+        req.user = user;
+        next();
+    } catch(err) {
+        return res.status(403).send(err.message);
+    }
 }
 
 exports.register = async (data) => {

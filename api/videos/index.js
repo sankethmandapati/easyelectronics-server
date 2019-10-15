@@ -1,5 +1,6 @@
 var router = require('express').Router();
 var videoController = require('./videos.controller');
+var auth = require('../auth/auth.service');
 const multer = require('multer');
 
 var storage = multer.diskStorage({
@@ -20,7 +21,8 @@ var storage = multer.diskStorage({
 var upload = multer({storage: storage});
 
 
-router.post('/upload', upload.single('file'), videoController.upload);
-router.post('/create', videoController.crate);
+router.post('/upload', auth.isAdmin, upload.single('file'), videoController.upload);
+router.post('/create', auth.authenticate, videoController.crate);
+router.get('/', auth.authenticate, videoController.getAllVideos);
 
 module.exports = router;

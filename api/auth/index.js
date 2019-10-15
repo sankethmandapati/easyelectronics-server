@@ -20,10 +20,9 @@ router.post('/register', async (req, res) => {
     }
 });
 
-router.get('/', async (req, res) => {
+router.get('/', authService.authenticate, (req, res) => {
     try {
-        const resp = await authService.authenticate(req.headers.accesstoken);
-        return res.json(resp);
+        return res.json(req.user);
     } catch(err) {
         console.log("error in route: ", err);
         return res.status(403).json({success: false, data: err.message});

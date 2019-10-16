@@ -1,7 +1,7 @@
 const Videos = require('./videos.model');
+const fs = require('fs');
 exports.upload = function(req, res) {
     try {
-      console.log('req: ', req.file);
       return res.send({
         fileName: req.file.filename, 
         uploaded: true
@@ -34,5 +34,50 @@ exports.getAllVideos = async function(req, res) {
     return res.send(videos);
   } catch(err) {
     return res.send("Internal server error");
+  }
+}
+
+exports.streamVideo = async function(req, res) {
+  try {
+    const video = await Videos.findById(req.params.id).select('video').lean().exec();
+    if(!video) {
+      return res.status(404).send("Requested video not found");
+    }
+
+
+    
+  const path = `public/uploads/videos/${video.video}`
+  const stat = fs.statSync(path);
+  const fileSize = stat.size;
+  const range = req.headers.range;
+  if(range) {
+    const parts = range.replace(/bytes=/, "").split("-");
+    const start = parseInt(parts[0], 10)
+    const end = parts[1] 
+      ? parseInt(parts[1], 10)
+      : fileSize-1;
+    const chunksize = (end-start) + 1;
+    const file = fs.createReadStream(path, {start, end})
+    const head = {
+      'Content-Range': `bytes ${start}-${end}/${fileSize}`,
+      'Accept-Ranges': 'bytes',
+      'Content-Length': chunksize,
+      'Content-Type': 'video/mp4',
+    }
+    res.writeHead(206, head);
+    file.pipe(res);
+  } else {
+    const head = {
+      'Content-Length': fileSize,
+      'Content-Type': 'video/mp4',
+    }
+    res.writeHead(200, head)
+    fs.createReadStream(path).pipe(res)
+  }
+
+
+  } catch(err) {
+    console.log("Error in streaming video: ", err);
+    return res.send("Error in streaming video");
   }
 }

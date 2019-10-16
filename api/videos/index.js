@@ -5,7 +5,8 @@ const multer = require('multer');
 
 var storage = multer.diskStorage({
     destination: (req, file, cb) => {
-      cb(null, 'public/uploads')
+      const folderName = (file.fieldname === 'video') ? 'videos' : 'static';
+      cb(null, `public/uploads/${folderName}`);
     },
     filename: (req, file, cb) => {
       const fileName = file.originalname.split('.').reduce((name, str, n) => {
@@ -21,8 +22,10 @@ var storage = multer.diskStorage({
 var upload = multer({storage: storage});
 
 
-router.post('/upload', auth.isAdmin, upload.single('file'), videoController.upload);
+router.post('/uploadVideo', auth.isAdmin, upload.single('video'), videoController.upload);
+router.post('/uploadThumbnail', auth.isAdmin, upload.single('thumbnail'), videoController.upload);
 router.post('/create', auth.authenticate, videoController.crate);
 router.get('/', auth.authenticate, videoController.getAllVideos);
+router.get('/streamVideo/:id', videoController.streamVideo);
 
 module.exports = router;

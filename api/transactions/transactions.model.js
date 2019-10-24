@@ -3,7 +3,8 @@ var mongoose = require('mongoose');
 const TransactionsModel = new mongoose.Schema({
     transactionId: {
         type: String,
-        required: true
+        required: true,
+        unique: true
     },
     transactionDate: {
         type: Date,

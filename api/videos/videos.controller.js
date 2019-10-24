@@ -1,9 +1,33 @@
-const Videos = require('./videos.model');
 const fs = require('fs');
+const Videos = require('./videos.model');
+const Subscriptions = require('../subscriptions/subscriptions.model');
+
+async function getVideCategoriesQuery(userId) {
+  try {
+    const subs = await Subscriptions.find({
+      user: userId, 
+      active: true
+    })
+    .select('subscriptionPlan')
+    .populate({
+      path: 'subscriptionPlan', 
+      select: 'categories'
+    })
+    .lean()
+    .exec();
+    const categories = subs.reduce((finalArr, sub) => finalArr.concat(sub.subscriptionPlan.categories), []);
+    console.log("categories: ", categories);
+    return categories;
+  } catch(err) {
+    console.log("Error: ", err);
+    return [];
+  }
+}
+
 exports.upload = function(req, res) {
     try {
       return res.send({
-        fileName: req.file.filename, 
+        fileName: req.file.filename,
         uploaded: true
       });
     } catch(err) {
@@ -30,7 +54,14 @@ exports.crate = async function(req, res) {
 
 exports.getAllVideos = async function(req, res) {
   try {
-    const videos = await Videos.find({}).lean().exec();
+    let query = {};
+    if(req.user.role !== 'admin') {
+      const categories = await getVideCategoriesQuery(req.user._id);
+      console.log("C1: ", categories);
+      query.category = {$in: categories};
+      // if(categories.length > 0)
+    }
+    const videos = await Videos.find(query).lean().exec();
     return res.send(videos);
   } catch(err) {
     return res.send("Internal server error");

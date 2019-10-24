@@ -22,7 +22,12 @@ var VideoSchema = new mongoose.Schema({
         required: true
     },
     videoType: String,
-    description: String
+    description: String,
+    category: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Category',
+        required: true
+    }
 });
 
 module.exports = mongoose.model('Video', VideoSchema);

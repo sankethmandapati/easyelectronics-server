@@ -36,6 +36,7 @@ const sendMail = async (emailId, name, id) => {
 exports.create = async (reqData) => {
     try {
         reqData.created_at = new Date();
+        reqData.categoriesSubscribed = [];
         const newUser = new UsersModel(reqData);
         const data = await newUser.save();
         await sendMail(data.email, data.name, data._id);
@@ -83,8 +84,8 @@ exports.getUsers = async (selfId, querry) => {
 
 exports.updateUser = async (data) => {
     try {
-        await UsersModel.update({_id: data.id}, {$set: data.body});
-        return {msg: "updated successfully"};
+        const updateDetails = await UsersModel.update({_id: data.id}, data.patch, {new: true});
+        return updateDetails;
     } catch(err) {
         throw err;
     }

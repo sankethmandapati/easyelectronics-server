@@ -30,7 +30,11 @@ const UsersSchema = new mongoose.Schema({
         required: true,
         default: 'guest',
         enum: ['admin', 'guest']
-    }
+    },
+    categoriesSubscribed: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Category'
+    }]
 });
 
 UsersSchema.pre('save', async function(next) {

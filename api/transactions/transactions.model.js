@@ -1,23 +1,14 @@
 var mongoose = require('mongoose');
 
 const TransactionsModel = new mongoose.Schema({
-    transactionId: {
-        type: String,
-        required: true,
-        unique: true
-    },
     transactionDate: {
         type: Date,
         required: true
     },
-    createdOn: {
-        type: Date,
-        required: true
-    },
-    userId: {
-        type: mongoose.Schema.Types.ObjectId,
+    transactionId: {
+        type: String,
         required: true,
-        ref: 'User'
+        unique: true
     },
     transactionMode: {
         type: String,
@@ -32,6 +23,15 @@ const TransactionsModel = new mongoose.Schema({
     transactionApproved: {
         type: Boolean,
         default: false
+    },
+    createdOn: {
+        type: Date,
+        required: true
+    },
+    userId: {
+        type: mongoose.Schema.Types.ObjectId,
+        required: true,
+        ref: 'User'
     },
     transactionApprovedBy: {
         type: mongoose.Schema.Types.ObjectId,

@@ -6,6 +6,25 @@ var SubscriptionsSchema = new mongoose.Schema({
         ref: 'User',
         required: true
     },
+    transactionId: {
+        type: String,
+        required: true,
+        unique: true
+    },
+    transactionAmount: {
+        type: Number,
+        required: true
+    },
+    transactionMode: {
+        type: String,
+        required: true,
+        enum: [
+            'NEFT',
+            'IMPS',
+            'UPI',
+            'PAYTM'
+        ]
+    },
     requestedOn: {
         type: Date,
         required: true
@@ -28,15 +47,12 @@ var SubscriptionsSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User'
     },
-    validUpto: Date,
-    transactionId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Transaction'
-    },
+    message: String,
     subscriptionPlan: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Subscription'
+        ref: 'SubscriptionPlans'
     },
+    validUpto: Date,
     active: {
         type: Boolean,
         default: false

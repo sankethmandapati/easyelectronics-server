@@ -1,6 +1,5 @@
 var UsersModel = require('./users.model');
 var mailer = require('../../lib/mailer');
-// var response = require('../../lib/response');
 
 const sendMail = async (emailId, name, id) => {
     try {
@@ -52,6 +51,7 @@ exports.readAll = async () => {
         const users = await UsersModel.find().select('-password').lean().exec();
         return users;
     } catch(err) {
+        console.log("Error: ", err);
         throw err;
     }
 }
@@ -63,12 +63,12 @@ exports.getUser = async (querry) => {
         }
         const user = await UsersModel.findOne(querry).lean().exec();
         if(!user) {
-            throw new Error("User details not found");
+            throw new Error("User not found");
         }
         return user;
     } catch(err) {
         console.log("Error: ", err);
-        throw new Error("We are facing some problem in finding the user details");
+        throw new Error("Unexpected error in retrieving user details");
     }
 }
 
@@ -128,10 +128,7 @@ exports.searchUsers = async (searchKeyword, selfId) => {
             .select('_id name email')
             .lean()
             .exec();
-        return {
-            success: true,
-            data: users
-        };
+        return users;
     } catch(err) {
         console.log("err: ", err);
         throw err;

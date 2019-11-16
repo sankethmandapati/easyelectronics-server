@@ -16,14 +16,9 @@ var SubscriptionsSchema = new mongoose.Schema({
         required: true
     },
     transactionMode: {
-        type: String,
-        required: true,
-        enum: [
-            'NEFT',
-            'IMPS',
-            'UPI',
-            'PAYTM'
-        ]
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'AccountDetail',
+        required: true
     },
     requestedOn: {
         type: Date,

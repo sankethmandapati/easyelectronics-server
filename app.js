@@ -5,10 +5,20 @@ var bodyParser = require('body-parser');
 var cors = require('cors');
 var mongoose = require('mongoose');
 const port = process.env.PORT || 4000;
+const { error } = require('./lib/response');
 
 app.use(cors());
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
+app.use(function (req, res, next) {
+    try {
+        next();
+    } catch(err) {
+        console.log("unhandled error: ", err);
+        console.log('Time:', Date.now());
+        return error(res);
+    }
+});
 
 mongoose.connect('mongodb://localhost:27017/easyelectronics', {useNewUrlParser: true});
 mongoose.connection.on('error', function() {

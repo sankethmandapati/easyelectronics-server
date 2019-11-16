@@ -27,5 +27,6 @@ router.post('/uploadThumbnail', auth.isAdmin, upload.single('thumbnail'), videoC
 router.post('/create', auth.authenticate, videoController.crate);
 router.get('/', auth.authenticate, videoController.getAllVideos);
 router.get('/streamVideo/:id', videoController.streamVideo);
+router.get('/:id', auth.authenticate, videoController.getVideoById);
 
 module.exports = router;

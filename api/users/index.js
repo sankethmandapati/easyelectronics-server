@@ -1,54 +1,54 @@
 const controller = require('./users.controller');
 const router = require('express').Router();
-var response = require('../../lib/response');
+var {success, error} = require('../../lib/response');
 
 router.get('/', async (req, res) => {
     try {
         const resp = await controller.readAll();
-        return response.success(res, resp);
+        return success(res, resp);
     } catch(err) {
-        return response.error(res, err);
+        return error(res);
     }
 });
 router.get('/:id', async (req, res) => { 
     try {
         const resp = await controller.getUser(req.params.id);
-        return response.success(res, resp);
+        return success(res, resp);
     } catch(err) {
-        return response.error(res, err);
+        return error(res, err, err.message);
     }
 });
 router.post('/',  async (req, res) => {
     try {
         const resp = await controller.create(req.body);
-        return response.success(res, resp);
+        return success(res, resp);
     } catch(err) {
-        return response.error(res, err);
+        return error(res, err);
     }
 });
 router.put('/:id',  async (req, res) => {
     try {
         const resp = await controller.updateUser({id: req.params.id, body: req.body});
-        return response.success(res, resp);
+        return success(res, resp);
     } catch(err) {
-        return response.error(res, err);
+        return error(res, err);
     }
 });
 router.delete('/:id', async (req, res) => { 
     try {
         const resp = await controller.removeUser(req.params.id);
-        return response.success(res, resp);
+        return success(res, resp);
     } catch(err) {
-        return response.error(res, err);
+        return error(res, err);
     }
 });
 router.get('/verifyMail/:id', async (req, res) => {
     try {
         const msg = await controller.verifyMail(req.params.id);
-        return response.success(res, {msg});
+        return success(res, {msg});
     } catch(err) {
         console.log("Err: ", err);
-        return response.error(res, err.message);
+        return error(res, err.message);
     }
 });
 

@@ -2,17 +2,17 @@ var moment = require('moment');
 var Subscriptions = require('./subscriptions.model');
 var { getPlanDetails, getPlanById } = require('../subscriptionPlans/subscriptionPlans.controller');
 var { updateUser } = require('../users/users.controller');
-
+var  { success, error, notFound } = require('../../lib/response');
 
 exports.getAll = async function(req, res) {
     try {
         const subscriptions = await Subscriptions.find({})
             .populate('auth acceptedBy rejectedBy transactionId subscriptionPlan ')
             .lean().exec();
-        return res.send(subscriptions);
+        return success(res, subscriptions);
     } catch(err) {
         console.log("Error: ", err);
-        return res.send("Error in fetching subscriptions.. please try later");
+        return error(res, err, "Error in fetching subscriptions.. please try later");
     }
 }
 
@@ -30,10 +30,10 @@ exports.create = async function(req, res) {
             transactionMode: req.body.transactionMode
         });
         const subscription = await newSubscription.save();
-        return res.send(subscription);
+        return success(res, subscription);
     } catch(err) {
         console.log("Error: ", err);
-        return res.send("Error in creating subscription, please try later");
+        return error(res, err, "Error in creating subscription, please try later");
     }
 }
 
@@ -68,10 +68,10 @@ exports.approve = async function(req, res) {
                 }
             }
         });
-        return res.send("Approval done successfully");
+        return success(res, "Approval done successfully");
     } catch(err) {
         console.log("Error: ", err);
-        return res.send("Error in approving subscriptions, please try again");
+        return error(res, err, "Error in approving subscriptions, please try again");
     }
 }
 
@@ -85,10 +85,10 @@ exports.reject = async function(req, res) {
             active: false
         };
         await updateSubscription(req.params.id, patch);
-        return res.send("Rejection done successfully");
+        return success(res, "Rejection done successfully");
     } catch(err) {
         console.log("Error: ", err);
-        return res.send("Error in rejecting the subscription: ", err);
+        return error(res, err, "Error in rejecting the subscription");
     }
 }
 
@@ -104,11 +104,11 @@ exports.getRequestDetailsById = async function(req, res) {
                 path: 'subscriptionPlan'
             }]).lean().exec();
         if(subscriptions.length === 0)
-            return res.send("No subscriptions found with this id");
-        return res.send(subscriptions);
+            return notFound(res, "No subscriptions found with this id");
+        return success(res, subscriptions);
     } catch(err) {
         console.log("Error: ", err);
-        return res.send("Error in getting subscription details");
+        return error(res, err, "Error in getting subscription details");
     }
 }
 
@@ -124,9 +124,9 @@ exports.getPendingRequests = async function(req, res) {
             }, {
                 path: 'subscriptionPlan'
             }]).lean().exec();
-        return res.send(subscriptions);
+        return success(res, subscriptions);
     } catch(err) {
         console.log("Error: ", err);
-        return res.send("Error in getting subscriptions");
+        return error(res, err, "Error in getting subscriptions");
     }
 }

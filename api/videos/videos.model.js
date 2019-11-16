@@ -19,7 +19,8 @@ var VideoSchema = new mongoose.Schema({
     },
     uploadedBy: {
         type: mongoose.Schema.Types.ObjectId,
-        required: true
+        required: true,
+        ref: 'User'
     },
     videoType: String,
     description: String,

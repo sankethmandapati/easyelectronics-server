@@ -14,7 +14,10 @@ var SubscriptionPlansSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    categories: [mongoose.Schema.Types.ObjectId],
+    categories: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Category'
+    }],
     active: {
         type: Boolean,
         default: true

@@ -2,6 +2,7 @@ const Users = require('../users/users.model');
 const usersController = require('../users/users.controller');
 var jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
+const {forbidden, unAuthorised} = require('../../lib/response');
 
 function generateJwt(userDetails) {
     const obj = {
@@ -26,7 +27,7 @@ function authenticateJwt(token) {
                 }
                 const user = await Users.findById(decoded.userId).select('-password').lean();
                 if(!user)
-                    throw new Error("Unable to authenticate the user");
+                    throw new Error("User id does not exist");
                 else if(!user.emailVerified)
                     throw new Error("Email address not verified");
                 resolve(user);
@@ -44,7 +45,7 @@ exports.authenticate = async (req, res, next) => {
         req.user = await authenticateJwt(token);
         next();
     } catch(err) {
-        return res.status(403).send(err.message);
+        return unAuthorised(res, err.message);
     }
 };
 
@@ -53,12 +54,12 @@ exports.isAdmin = async function(req, res, next) {
         const token = req.headers.accesstoken;
         const user = await authenticateJwt(token);
         if(user.role !== 'admin') {
-            return res.status(403).send("You dont have permission to perform this operation");
+            return forbidden(res, "You dont have permission to perform this operation");
         }
         req.user = user;
         next();
     } catch(err) {
-        return res.status(403).send(err.message);
+        return forbidden(res, err.message);
     }
 }
 
@@ -84,10 +85,11 @@ exports.login = async (data) => {
             return authObj;
         } else {
             // Passwords don't match
-            throw new Error("Wrong password");
+            throw new Error("Username or password was wrong, please try again");
         }
     } catch(err) {
-        throw err;
+        console.log("Error: ", err);
+        throw new Error("Unexpected error occured, please try again");
     }
 }
 

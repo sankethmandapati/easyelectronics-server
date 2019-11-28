@@ -19,22 +19,22 @@ function authenticateJwt(token) {
     return new Promise((resolve, reject) => {
         try {
             if(!token) {
-                throw new Error("Token not found");
+                reject("Token not found");
             }
             jwt.verify(token, 'e@$yE|ecTr0n!c$', async function(err, decoded) {
                 if(err || !decoded) {
-                    throw new Error("Failed to authenticate user");
+                    reject("Failed to authenticate user");
                 }
                 const user = await Users.findById(decoded.userId).select('-password').lean();
                 if(!user)
-                    throw new Error("User id does not exist");
+                    reject("User id does not exist");
                 else if(!user.emailVerified)
-                    throw new Error("Email address not verified");
+                    reject("Email address not verified");
                 resolve(user);
             });
         } catch(err) {
             console.log("err: ", err);
-            throw err;
+            reject(err.message);
         }
     });
 }
